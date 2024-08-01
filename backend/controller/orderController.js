@@ -40,7 +40,7 @@ const addOrderItems = asyncHandler(async (req, res) => {
       // calculate prices
       const { itemsPrice, taxPrice, shippingPrice, totalPrice } =
         calcPrices(dbOrderItems);
-  
+      console.log(`itemsPrice -${itemsPrice}`);
       const order = new Order({
         orderItems: dbOrderItems,
         user: req.user._id,
