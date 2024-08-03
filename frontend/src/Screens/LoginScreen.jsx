@@ -11,6 +11,7 @@ import { toast } from 'react-toastify';
 const LoginScreen =()=>{
     const [email,setEmail]=useState(''); 
     const [password,setPassword]=useState('');
+    const [errors, setErrors] = useState({});
     
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -28,8 +29,26 @@ const LoginScreen =()=>{
         }
     },[userInfo,redirect,navigate]); 
 
+    const validate = () => {
+        const errors = {};
+        if (!email) {
+            errors.email = "Email is required";
+        } else if (!/\S+@\S+\.\S+/.test(email)) {
+            errors.email = "Email is invalid";
+        }
+        if (!password) {
+            errors.password = "Password is required";
+        } 
+        return errors;
+    };
     const submitHandler = async(e)=>{
         e.preventDefault();
+        const validationErrors = validate();
+        if (Object.keys(validationErrors).length > 0) {
+            setErrors(validationErrors);
+            return;
+        }
+        setErrors({});
         try{
             const res= await login({email,password}).unwrap();
             dispatch(setCredentials({...res,}));
@@ -51,7 +70,9 @@ const LoginScreen =()=>{
                         placeholder="Enter email"
                         value={email}
                         onChange={(e)=>{setEmail(e.target.value)}}
-                    ></Form.Control>    
+                        isInvalid={!!errors.email}
+                    ></Form.Control> 
+                                        {errors.email && <Form.Control.Feedback type="invalid">{errors.email}</Form.Control.Feedback>}   
                 </Form.Group>  
                 <Form.Group controlId="password" className="my-3">
                     <Form.Label>Password</Form.Label>
@@ -60,7 +81,9 @@ const LoginScreen =()=>{
                         placeholder="Enter password"
                         value={password}  
                         onChange={(e)=>{setPassword(e.target.value)}}
-                    ></Form.Control>    
+                        isInvalid={!!errors.password}
+                    ></Form.Control>
+                      {errors.password && <Form.Control.Feedback type="invalid">{errors.password}</Form.Control.Feedback>}    
                 </Form.Group>  
                 <Button type="submit" variant="primary" className="mt-3" disabled={isLoading}>Sign In</Button>
                 {isLoading && <Loader/>}
